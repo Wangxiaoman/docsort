@@ -1,0 +1,27 @@
+# Python 运行产物
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# 离线 wheel 目录与离线安装包
+pkgs/
+docsort_offline_*.tar.gz
+
+# 运行时的输入/输出/日志目录
+case/
+sorted/
+failed/
+audit/
+inbox/
+
+# 打包产物
+build/
+dist/
+*.spec
+
+# 系统/编辑器杂项
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

@@ -1,0 +1,69 @@
+# 冒烟测试配置: ocr.backend=text（仅文本层，不依赖 paddle），其余同生产模板
+ocr:
+  backend: text
+  text_layer_min_chars: 30
+
+classification:
+  early_stop: true
+  max_pages: 3
+  min_margin: 2
+  default_threshold: 5
+
+routing:
+  action: move
+  on_conflict: rename
+  failed_folder: ./failed
+  archive: ""
+
+audit:
+  log: ./audit/docsort.jsonl
+
+templates:
+  invoice:
+    rules:
+      - { pattern: "发票", weight: 3 }
+      - { pattern: "发票号码", weight: 3 }
+      - { pattern: "(?<!\\d)\\d{20}(?!\\d)", weight: 2 }
+      - { pattern: "增值税", weight: 2 }
+      - { pattern: "价税合计", weight: 2 }
+      - { pattern: "税率|税额", weight: 1 }
+    threshold: 5
+    route:
+      folder: "./sorted/发票/{yyyy}-{MM}/{filename}"
+
+  contract:
+    rules:
+      - { pattern: "合同|协议书", weight: 3 }
+      - { pattern: "甲方", weight: 2 }
+      - { pattern: "乙方", weight: 2 }
+      - { pattern: "第[一二三四五六七八九十百\\d]+条", weight: 2 }
+      - { pattern: "签字|盖章", weight: 1 }
+    threshold: 5
+    route:
+      folder: "./sorted/合同/{yyyy}/{filename}"
+
+  idcard:
+    rules:
+      - { pattern: "居民身份证", weight: 3 }
+      - { pattern: "公民身份号码", weight: 3 }
+      - { pattern: "(?<!\\d)\\d{17}[0-9Xx](?!\\d)", weight: 3 }
+      - { pattern: "性别|民族", weight: 1 }
+      - { pattern: "住址", weight: 1 }
+    threshold: 6
+    route:
+      folder: "./sorted/身份证/{filename}"
+
+  businesscard:
+    rules:
+      - { pattern: "手机", weight: 1 }
+      - { pattern: "电话", weight: 1 }
+      - { pattern: "1[3-9]\\d{9}", weight: 3 }
+      - { pattern: "[\\w.+-]+@[\\w-]+\\.[\\w.]+", weight: 2 }
+      - { pattern: "总经理|经理|主管|工程师|总监|顾问|销售|市场", weight: 2 }
+    threshold: 4
+    route:
+      folder: "./sorted/名片/{filename}"
+
+  unknown:
+    route:
+      folder: "./sorted/待人工/{filename}"
